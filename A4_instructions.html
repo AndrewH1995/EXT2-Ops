@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Assignment 4 - File Systems</title>
+
+    <meta name="author" content="Bogdan Simion">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--
+  <link href="http://www.teach.cs.toronto.edu/~csc369h/fall/assets/themes/bootstrap/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="http://www.teach.cs.toronto.edu/~csc369h/fall//assets/css/mystyle.css" rel="stylesheet">
+-->
+    <link href="http://www.teach.cs.toronto.edu/~csc369h/fall//assets/css/stripped.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="http://www.teach.cs.toronto.edu/~csc369h/fall/assets/themes/bootstrap/resources/respond/Respond.min.js"></script>
+    <![endif]-->
+
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+    <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                <a class="navbar-brand" href="http://www.teach.cs.toronto.edu/~csc369h/fall/index.html">CSC369H: Operating Systems</a>
+            </div>
+
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav">
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/info.html" target="_blank">Syllabus</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/info.html">Syllabus</a></li>
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/lectures.html" target="_blank">Lectures</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/lectures.html">Lectures</a></li>
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/assignments.html" target="_blank">Assignments</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/assignments.html">Assignments</a></li>
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/tests.html" target="_blank">Tests</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/tests.html">Tests</a></li>
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/grades.html" target="_blank">Grades</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/grades.html">Grades</a></li>
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/feedback.html" target="_blank">Anonymous Feedback</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/feedback.html">Anonymous Feedback</a></li>
+
+
+
+
+                    <!--               <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/discussions.html" target="_blank">Discussion Board</a></li>
+-->
+                    <li><a href="http://www.teach.cs.toronto.edu/~csc369h/fall/discussions.html">Discussion Board</a></li>
+
+
+
+
+                    <!--               <li><a href="https://markus.teach.cs.toronto.edu/csc369-2017-09/" target="_blank">MarkUs</a></li>
+-->
+                    <li><a href="https://markus.teach.cs.toronto.edu/csc369-2017-09/">MarkUs</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+
+        <div class="page-header">
+            <h1>Assignment 4 - File Systems </h1>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <p><b>Due</b>: Dec 3, at 10 p.m.
+                    <font color="red">(Do not leave this assignment until the last few days, or you will NOT be able to complete it! Work together with your partner, do not split up the tasks since lots of common code may be reusable if you design your code together!)</font>
+                </p>
+
+
+                <h2>Introduction</h2>
+
+                <p>In this assignment, you will explore the implementation of a particular file system, ext2, and will write tools to modify ext2-format virtual disks. To do this work, you will need to be comfortable working with binary data and will need
+                    to learn about the ext2 filesystem.</p>
+
+                <p>You can work in pairs for this assignment. MarkUs will only create the appropriate A4 directory in your repository when you log into MarkUs and either invite a partner, or declare that you will work alone. As usual, please log into MarkUs
+                    well before the deadline to make sure you can access your repository. (Do <b>not</b> create an A4 the directory in svn, otherwise MarkUs won't know about it and we won't be able to see your work.)</p>
+
+                <p>This assignment contains some bonus features. Implementing a bonus will compensate for any possible marks lost in another section of the assignment, but can also give you more than 100% if implemented correctly. For implementing any additional
+                    functionality which is not specified in the handout, or if you are unsure whether to handle some inode parameters in specific cases (after having read the documentation!), please ask on the discussion board.</p>
+
+                <h3>Requirements</h3>
+
+                <p>Your task is to write a set of programs (in C) that operate on an ext2 formatted virtual disk. The executables must be named <b>exactly as listed below</b>, and must take the specified arguments.</p>
+
+                <ul>
+                    <li><tt>ext2_mkdir</tt>: This program takes two command line arguments. The first is the name of an ext2 formatted virtual disk. The second is an absolute path on your ext2 formatted disk. The program should work like <tt>mkdir</tt>, creating
+                        the final directory on the specified path on the disk. If any component on the path to the location where the final directory is to be created does not exist or if the specified directory already exists, then your program should
+                        return the appropriate error (ENOENT or EEXIST).
+                        <br/>
+                        <i>Note:</i>
+                        <ul>
+                            <li> Please read the specifications to make sure you're implementing everything correctly (e.g., directory entries should be aligned to 4B, entry names are not null-terminated, etc.).
+                            </li>
+                            <li> When you allocate a new inode or data block, you *must use the next one available* from the corresponding bitmap (excluding reserved inodes, of course). Failure to do so will result in deductions, so please be careful about
+                                this requirement.
+                            </li>
+                            <li> Be careful to consider trailing slashes in paths. These will show up during testing so it's your responsibility to make your code as robust as possible by capturing corner cases.
+                            </li>
+                        </ul>
+                    </li>
+                    <br/>
+
+                    <li><tt>ext2_cp</tt>: This program takes three command line arguments. The first is the name of an ext2 formatted virtual disk. The second is the path to a file on your native operating system, and the third is an absolute path on your
+                        ext2 formatted disk. The program should work like <tt>cp</tt>, copying the file on your native file system onto the specified location on the disk. If the source file does not exist or the target is an invalid path, then your program
+                        should return the appropriate error (ENOENT). If the target is a file with the same name that already exists, you should not overwrite it (as cp would), just return EEXIST instead.
+                        <br/>
+                        <i>Note:</i>
+                        <ul>
+                            <li> Please read the specifications of ext2 carefully, some things you will not need to worry about (like permissions, gid, uid, etc.), while setting other information in the inodes may be important (e.g., i_dtime).
+                            </li>
+                            <li> When you allocate a new inode or data block, you *must use the next one available* from the corresponding bitmap (excluding reserved inodes, of course). Failure to do so will result in deductions, so please be careful about
+                                this requirement.
+                            </li>
+                            <li> Be careful to consider trailing slashes in paths. These will show up during testing so it's your responsibility to make your code as robust as possible by capturing corner cases.
+                            </li>
+                        </ul>
+                    </li>
+                    <br/>
+
+                    <li><tt>ext2_ln</tt>: This program takes three command line arguments. The first is the name of an ext2 formatted virtual disk. The other two are absolute paths on your ext2 formatted disk. The program should work like <tt>ln</tt>, creating
+                        a link from the first specified file to the second specified path. This program should handle any exceptional circumstances, for example: if the source file does not exist (ENOENT), if the link name already exists (EEXIST), if
+                        a hardlink refers to a directory (EISDIR), etc. then your program should return the appropriate error code. Additionally, this command may take a "-s" flag, after the disk image argument. When this flag is used, your program must
+                        create a symlink instead (other arguments remain the same).
+                        <br/>
+                        <i>Note:</i>
+                        <ul>
+                            <li> For symbolic links, you will see that the specs mention that if the path is short enough, it can be stored in the inode in the space that would otherwise be occupied by block pointers - these are called fast symlinks. Do *not*
+                                implement fast symlinks, just store the path in a data block regardless of length, to keep things uniform in your implementation, and to facilitate testing. If in doubt about correct operation of links, use the ext2 specs
+                                and ask on the discussion board.
+                            </li>
+                        </ul>
+                    </li>
+                    <br/>
+
+                    <li><tt>ext2_rm</tt>: This program takes two command line arguments. The first is the name of an ext2 formatted virtual disk, and the second is an absolute path to a file or link (not a directory) on that disk. The program should work
+                        like <tt>rm</tt>, removing the specified file from the disk. If the file does not exist or if it is a directory, then your program should return the appropriate error. Once again, please read the specifications of ext2 carefully,
+                        to figure out what needs to actually happen when a file or link is removed (e.g., no need to zero out data blocks, must set i_dtime in the inode, removing a directory entry need not shift the directory entries after the one being
+                        deleted, etc.).
+                        <br/>
+                        <i>BONUS:</i> Implement an additional "-r" flag (after the disk image argument), which allows removing directories as well. In this case, you will have to recursively remove all the contents of the directory specified in the last
+                        argument. If "-r" is used with a regular file or link, then it should be ignored (the ext2_rm operation should be carried out as if the flag had not been entered). If you decide to do the bonus, make sure first that your ext2_rm
+                        works, then create a new copy of it and rename it to ext2_rm_bonus.c, and implement the additional functionality in this separate source file.
+                    </li>
+                    <br/>
+
+                    <li><tt>ext2_restore</tt>: This program takes two command line arguments. The first is the name of an ext2 formatted virtual disk, and the second is an absolute path to a file or link (not a directory!) on that disk. The program should
+                        be the exact opposite of <tt>rm</tt>, restoring the specified file that has been previous removed. If the file does not exist (it may have been overwritten), or if it is a directory, then your program should return the appropriate
+                        error.
+                        <br/>
+                        <i>Hint:</i> The file to be restored will not appear in the directory entries of the parent directory, unless you search the "gaps" left when files get removed. The directory entry structure is the key to finding out these gaps
+                        and searching for the removed file.
+                        <br/>
+                        <i>Note:</i> If the directory entry for the file has not been overwritten, you will still need to make sure that the inode has not been reused, and that none of its data blocks have been reallocated. You may assume that the bitmaps
+                        are reliable indicators of such fact. If the file cannot be fully restored, your program should terminate with ENOENT, indicating that the operation was unsuccessful.
+                        <br/>
+                        <i>Note(2):</i> For testing, you should focus primarily on restoring files that you've removed using your ext2_rm implementation, since ext2_restore should undo the exact changes made by ext2_rm. While there are some removed entries
+                        already present in some of the image files provided, the respective files have been removed on a non-ext2 file system, which is not doing the removal the same way that ext2 would. In ext2, when you do "rm", the inode's i_blocks
+                        do not get zeroed, and you can do full recovery, as stated in the assignment (which deals solely with ext2 images, hence why you only have to worry about this type of (simpler) recovery). In other FSs things work differently. In
+                        ext3, when you rm a file, the data block indexes from its inode do get zeroed, so recovery is not as trivial. For example, there are some removed files in <tt>deletedfile.img</tt>, which have their blocks zero-ed out (due to how
+                        these images were created). There are also some unrecoverable entries in images like <tt>twolevel.img</tt>, <tt>largefile.img</tt>, etc. In such cases, your code should still work, but simply recover a file as an empty file (with
+                        no data blocks), or discard the entry if it is unrecoverable. However, for the most part, try to recover files that you've ext2_rm-ed yourself, to make sure that you can restore data blocks as well. We will not be testing recovery
+                        of files removed with a non-ext2 tool.
+                        <br/>
+                        <i>Note(3):</i> We will not try to recover files that had hardlinks at the time of removal. This is because when trying to restore a file, if its inode is already in use, there are two options: the file we're trying to restore
+                        previously had other hardlinks (and hence its inode never really got invalidated), _or_ its inode has been re-allocated to a completely new file. Since there is no way to tell between these 2 possibilities, recovery in this case
+                        should not be attempted.
+                        <br/>
+                        <i>BONUS:</i> Implement an additional "-r" flag (after the disk image argument), which allows restoring directories as well. In this case, you will have to recursively restore all the contents of the directory specified in the
+                        last argument. If "-r" is used with a regular file or link, then it should be ignored (the restore operation should be carried out as if the flag had not been entered). If you decide to do the bonus, make sure first that your ext2_restore
+                        works, then create a new copy of it and rename it to ext2_restore_bonus.c, and implement the additional functionality in this separate source file.
+                    </li>
+                    <br/>
+
+                    <li><tt>ext2_checker</tt>: This program takes only one command line argument: the name of an ext2 formatted virtual disk. The program should implement a lightweight file system checker, which detects a small subset of possible file system
+                        inconsistencies and takes appropriate actions to fix them (as well as counts the number of fixes), as follows:
+                        <ol type="a">
+                            <li>the superblock and block group counters for free blocks and free inodes must match the number of free inodes and data blocks as indicated in the respective bitmaps. If an inconsistency is detected, the checker will trust the
+                                bitmaps and update the counters. Once such an inconsistency is fixed, your program should output the following message: "Fixed: X's Y counter was off by Z compared to the bitmap", where X stands for either "superblock"
+                                or "block group", Y is either "free blocks" or "free inodes", and Z is the difference (in absolute value). The Z values should be added to the total number of fixes.
+                            </li>
+                            <li>for each file, directory, or symlink, you must check if its inode's i_mode matches the directory entry file_type. If it does not, then you shall trust the inode's i_mode and fix the file_type to match. Once such an inconsistency
+                                is repaired, your program should output the following message: "Fixed: Entry type vs inode mismatch: inode [I]", where I is the inode number for the respective file system object. Each inconsistency counts towards to total
+                                number of fixes.
+                            </li>
+                            <li>for each file, directory or symlink, you must check that its inode is marked as allocated in the inode bitmap. If it isn't, then the inode bitmap must be updated to indicate that the inode is in use. You should also update
+                                the corresponding counters in the block group and superblock (they should be consistent with the bitmap at this point). Once such an inconsistency is repaired, your program should output the following message: "Fixed: inode
+                                [I] not marked as in-use", where I is the inode number. Each inconsistency counts towards to total number of fixes.
+                            </li>
+                            <li>for each file, directory, or symlink, you must check that its inode's i_dtime is set to 0. If it isn't, you must reset (to 0), to indicate that the file should not be marked for removal. Once such an inconsistency is repaired,
+                                your program should output the following message: "Fixed: valid inode marked for deletion: [I]", where I is the inode number. Each inconsistency counts towards to total number of fixes.
+                            </li>
+                            <li>for each file, directory, or symlink, you must check that all its data blocks are allocated in the data bitmap. If any of its blocks is not allocated, you must fix this by updating the data bitmap. You should also update the
+                                corresponding counters in the block group and superblock, (they should be consistent with the bitmap at this point). Once such an inconsistency is fixed, your program should output the following message: "Fixed: D in-use
+                                data blocks not marked in data bitmap for inode: [I]", where D is the number of data blocks fixed, and I is the inode number. Each inconsistency counts towards to total number of fixes.
+                            </li>
+                        </ol>
+                        Your program must count all the fixed inconsistencies, and produce one last message: either "N file system inconsistencies repaired!", where N is the number of fixes made, or "No file system inconsistencies detected!".
+                        <br/> You may limit your consistency checks to only regular files, directories and symlinks.
+                        <br/>
+                        <i>Hint:</i> You might want to fix the counters based on the bitmaps, as a one-time step before attempting to fix any other type of inconsistency. Even if initially trusting the bitmaps may not be the way to go (since they could
+                        be corrupted), the counters should get readjusted in the later steps anyway, whenever the bitmaps get updated. The Z values from point a) should be added to the tally of fixes, but do not include any further superblock or block
+                        group counter adjustments from points c) and e) (since technically these may be just correcting the adjustments made in point a)).
+                    </li>
+                </ul>
+                </p>
+
+                <p>All of these programs should be minimalist. Don't implement what isn't specified: only provide the required functionality. For example, don't implement wildcards. Also, can't delete directories? Too bad! Unless you want the bonus! :)
+                    <br/> However, it is your responsibility to make your code as robust as possible by capturing corner cases for the functionality that you need to implement. For example, be careful to consider trailing slashes in paths (e.g., ext2_cp,
+                    ext2_mkdir, etc.). Such things will show up in our tests, so you need to test your code properly!
+                </p>
+
+                <p>Some simplifying assumptions that you can make about the implementation:
+                    <ul>
+                        <li>You may assume that a path will not include symlinks in the middle. However, keep in mind that a path may be invalid so you need to check every entry along the path.</li>
+                        <li>You may assume that for recovery purposes, you will not be asked to recover files with hardlinks. When attempting to restore a file, <mark>if its inode is marked as in-use in the inode bitmap, then you can safely assume that the file
+                            is not recoverable.</mark></li>
+                        <li>If a file that gets removed happens to be the only entry in the last directory block of a directory, then you do not need to "reclaim" this directory block. </li>
+                        <li>When creating a file or directory, you <mark>should always create an entry at the end of the last block of the parent directory, or in a new block if there is no space. You should not attempt to create a new entry in a "gap" resulted
+                            from a previously removed entry.</mark> </li>
+                    </ul>
+                </p>
+
+                <p>Additionally, please be careful in following the specifications. When in doubt about how to handle a specific case, please ask on the discussion board. For example, a tricky corner case arises if a directory has more than one block and
+                    you are removing a file or directory which happens to be the first entry in a block other than the first. In this case, you do not have "." and ".." to change the rec_len for. In order to avoid losing track of any potential subsequent
+                    entries, you should take the approach described in the specs. You should be able to infer from the specs that in this special case, your must zero the inode and adjust the rec_len to the next entry (or the end of the block). In this
+                    case, this file will become unrecoverable and that's ok.</li>
+                    </ul>
+                </p>
+
+                <p>You will find it <i>very</i> useful for these programs to share code. You will want a function that performs a path walk, for example. You will also want a function that opens a specific directory entry and writes to it.
+                    <p>
+
+                        <p>To help you visualize your file system, we are giving you an already built tool, called
+                            <tt><mark>ext2_ls</mark></tt>. This program takes two command line arguments.
+                            <br/>- The first is the name of an ext2 formatted virtual disk.
+                            <br/>- The second is an absolute path on the ext2 formatted disk.
+                            <br/><mark>The program works like <tt>ls -1a</tt> </mark> (that's number one "1", not lowercase letter "L"): it prints one line for every directory entry (including "." and "..") from the directory specified by the absolute path. If the
+                            path does not exist, it prints "No such file or directory". If the path is a file or link, the tool simply prints the full path on a single line.
+                        </p>
+
+                        <p>We are also giving you a tool called
+                            <tt><mark>ext2_dump</mark></tt>, which <mark>dumps all the raw information about the image contents</mark>. This is very similar to the readimage program that you have to implement for the tutorial exercises that give you practice
+                            with ext2 images. Once again, we encourage you to work on the tutorial exercises first, to gain experience with extracting various bits of information from an ext2 image.
+                        </p>
+
+                        <p>We are also giving you a tool called
+                            <tt><mark>ext2_corruptor</mark></tt>, which <mark>corrupts file system images, introducing various inconsistencies like the ones that you have to fix.</mark> This tool has limited capabilities, and is solely to help you
+                            with basic testing. You are welcome to develop your own corruptor tool as well.
+                        </p>
+
+                        <p> Finally, to help you in determine some basic correctness, we are giving you some sample test cases: running a set of commands and their expected outputs (image dumps). These self-tester test cases are found on the teaching labs
+                            under: <tt>/u/csc369h/winter/pub/public/A4-self-test</tt>
+                        </p>
+
+                        <h2>Learning about the Filesystem</h2>
+
+                        <p>Here are several sample virtual disk images:
+                            <p>
+
+                                <ul>
+                                    <li><a href="./images/emptydisk.img">emptydisk</a>: An empty virtual disk.</li>
+                                    <li><a href="./images/onefile.img">onefile</a>: A single text file has been added to emptydisk.</li>
+                                    <li><a href="./images/deletedfile.img">deletedfile</a>: The file from onefile has been removed.</li>
+                                    <li><a href="./images/onedirectory.img">onedirectory</a>: A single directory containing a text file has been added to emptydisk.</li>
+                                    <li><a href="./images/hardlink.img">hardlink</a>: A hard link to the textfile in onedirectory was added.</li>
+                                    <li><a href="./images/deleteddirectory.img">deleteddirectory</a>: A recursive remove was used to remove the directory and file from onedirectory.</li>
+                                    <li><a href="./images/twolevel.img">twolevel</a>: The root directory contains a directory called <code>level1</code> and a file called <code>afile</code>. <code>level1</code> contains a directory called <code>level2</code>,
+                                        and <code>level2</code> contains a file called <code>bfile</code>.</li>
+                                    <li><a href="./images/twolevel-corrupt.img">twolevel-corrupt</a>: Same as <code>twolevel</code>, except that the image contains file system inconsistencies that you will have to repair with the checker.</li>
+                                    <li><a href="./images/twolevel-norestore-afile.img">twolevel-norestore-afile</a>: Same as <code>twolevel</code>, except that /afile has been removed, and its inode number has been reused. This image can be used for testing
+                                        the case when a file cannot be restored.</li>
+                                    <li><a href="./images/largefile.img">largefile</a>: A file larger than 13KB (13440 bytes) is in the root directory. This file requires the single indirect block in the inode.</li>
+                                </ul>
+
+                                <p>These disks were each created and formatted in the same way (on an ubuntu virtual machine):
+                                    <p>
+
+                                        <pre>% dd if=/dev/zero of=~/DISKNAME.img bs=1024 count=128
+% mke2fs -N 32 DISKNAME.img
+% sudo mount -o loop ~/DISKNAME.img /home/bogdan/mntpoint
+% cd /home/bogdan/mntpoint
+% ...... normal linux commands to add/remove files/directories/links .....
+% cd ~
+% umount /home/bogdan/mntpoint</pre>
+
+                                        <p>Since we are creating images with mke2fs, the disks are formatted with the <a href="http://en.wikipedia.org/wiki/Ext2">ext2 file system</a>. You may wish to read about this system before doing some exploration.
+                                            The <a href="http://en.wikipedia.org/wiki/Ext2">wikipedia page for ext2</a> provides a good overview, but the <a href="http://wiki.osdev.org/Ext2">Ext2 wiki</a> and Dave Poirer's <a href="http://www.nongnu.org/ext2-doc/index.html">Second Extended File System</a>                                            article provide more detail on how the system places data onto a disk. It's a good reference to keep on hand as you explore. </p>
+
+                                        <p>We are restricting ourselves to some simple parameters, so you can make the following assumptions when you write your code:</p>
+                                        <ul>
+                                            <li><mark>A disk is 128 blocks where the block size is 1024 bytes.</mark></li>
+                                            <li><mark>There is only one block group.</mark></li>
+                                            <li><mark>There are 32 inodes.</mark></li>
+                                            <li>You do not have to worry about permissions or modified time fields in the inodes. You should <mark>set the type (in <code>i_mode</code>), <code>i_size</code>, <code>i_links_count</code>, <code>i_blocks</code>(disk
+                                                sectors), and the <code>i_block</code> array.</mark></li>
+                                        </ul>
+                                        <p>We will <em>not</em> test your code on anything other than disk images that follow this specification, or on corrupted disk images.</p>
+
+                                        <p>Other tips:</p>
+                                        <ul>
+                                            <li>Inode and disk block numbering starts at 1 instead of 0.</li>
+                                            <li>The root inode is inode number 2 (at index 1)</li>
+                                            <li>The first 11 inodes are reserved.</li>
+                                            <li>There is always a lost+found directory in the root directory.</li>
+                                            <li>Disk sectors are 512 bytes. (This is relevant for the i_blocks field of the inode.)</li>
+                                            <li>You should be able to handle directories that require more than one block.</li>
+                                            <li>You should be able to handle a file that needs a single indirection</li>
+                                            <li>Although you can construct your own structs from the information in the documentation above, you are welcome to use the <a href="./ext2.h"><tt>ext2.h</tt></a> file that I used for the test code. I took out a
+                                                bunch of components that we aren't using, but there are still quite a few fields that are irrelevant for our purposes.</li>
+                                        </ul>
+
+
+                                        <p>However, you will probably also want to explore the disk images to get an intuitive sense of how they are structured. (The next three exercises will also help you explore the disk images and get started on the assignment.)</p>
+
+                                        <p>There are two good ways to interface with these images. The first way is to interact with it like a user by mounting the file system so that you can use standard commands (mkdir, cp, rm, ln) to interact with it.
+                                            Details of how to do this are below. The second way is to interact with the disk as if it is a flat binary file. Use <tt>xxd</tt> to create hex dumps, <tt>diff</tt> to look for differences between the dumps,
+                                            and your favorite text editor to view the diffs. For example (YMMV):</p>
+
+                                        <pre>% diff &lt;(xxd emptydisk.img) &lt;(xxd onefile.img) > empty-onefile.diff
+% vimdiff empty-onefile.diff</pre>
+
+                                        <p>You should be able to use a combination of these techniques to understand how files are placed on disk and how they are removed. For example, you can create a new disk image, use <tt>mount</tt> to place files of
+                                            various sizes on it, unmount it, and then use <tt>xxd</tt> and <tt>diff</tt> to see how the image differs from the other images you have.</p>
+
+                                        <h3>Mounting a file system</h3>
+                                        <p>If you have root access on a Linux machine (or Linux virtual machine), you can use <tt>mount</tt> to mount the disk into your file system and to peruse its contents. (Note: this requires <tt>sudo</tt>, so you will
+                                            need to do this on a machine (or virtual machine) that you administer.</p>
+
+                                        <p>On the teaching labs, you can use a tool called FUSE that allows you to mount a file system at user-level (from your regular account). It may not work on an NFS mounted file system, so
+                                            <font color="red"><b>this will only work on the teaching labs workstations (it will not work via ssh-ing remotely).</b></font>
+                                        </p>
+
+                                        <p>Note: &lt;UtorID> should be replaced with your own UtorID below.</p>
+
+                                        <pre>
+# create a directory in /tmp and go there
+mkdir -m 700 /tmp/&lt;UtorID>-csc369h
+cd /tmp/&lt;UtorID>-csc369h
+
+# to create your own disk image
+dd if=/dev/zero of=DISKNAME.img bs=1024 count=128
+/sbin/mke2fs -N 32 -F DISKNAME.img
+
+# create a mount point and mount the image
+# CWD is /tmp/&lt;UtorID>-csc369h
+mkdir mnt
+fuseext2 -o rw+ DISKNAME.img mnt
+
+# check to see if it is mounted
+df -hl
+
+# now you can use the mounted file system, for example
+mkdir mnt/test
+
+# unmount the image
+fusermount -u mnt
+</pre>
+
+                                        <p>You can use the same strategy to mount one of the images provided above.</p>
+
+                                        <h2>Marking scheme</h2>
+
+                                        <p>
+                                            <ul>
+                                                <li><tt>ext2_cp:</tt> 12%</li>
+                                                <li><tt>ext2_mkdir:</tt> 12%</li>
+                                                <li><tt>ext2_ln:</tt> 12%</li>
+                                                <li><tt>ext2_rm:</tt> 14% (+5% bonus)</li>
+                                                <li><tt>ext2_restore:</tt> 20% (+5% bonus)</li>
+                                                <li><tt>ext2_checker:</tt> 20%</li>
+                                                <li>Code style and organization: 10% - code design/organization (modularity, code readability, reasonable variable names, avoid code duplication, appropriate comments where necessary, proper indentation and
+                                                    spacing, etc.) </li>
+                                                <li><b>Negative deductions (please be careful about these!):
+    	<ul>
+    	<li>Code does not compile -100%  for *any* mistake, for example: missing source file necessary for building your code (including Makefile, provided ext2.h header, etc.), wrong Makefile target names, typos, any compilation error, etc.</li>
+    	<li>No <code>plagiarism.txt</code> file: -100% (we will assume that your code is plagiarised, if this file is missing)</li>
+    	<li>Missing or incorrect INFO.txt: -10%</li>
+    	<li>Warnings: -10%</li>
+    	<li>Extra output to stdout: -20%</li>
+    	<li>Code placed in subdirectories: -20% (only place your code directly under your A4 directory)</li>
+    	<li>See more instructions at the end of this handout.</li>
+    	</ul>
+    	</b>
+                                                </li>
+                                            </ul>
+                                        </p>
+
+                                        <h2>Submission</h2>
+
+                                        <p>The assignment should be submitted to an <tt>A4</tt> directory in your svn repository. Don't forget to add and commit all of the code for the required programs. Please also provide a Makefile that will create your
+                                            programs. Your Makefile should use -Wall, and produce no warnings. Please make sure that your Makefile includes the following <b>separate targets</b>:
+                                            <ul>
+                                                <li><tt>ext2_cp:</tt> compiles and produces the <tt>ext2_cp</tt> executable</li>
+                                                <li><tt>ext2_mkdir:</tt> compiles and produces the <tt>ext2_mkdir</tt> executable</li>
+                                                <li><tt>ext2_ln:</tt> compiles and produces the <tt>ext2_ln</tt> executable</li>
+                                                <li><tt>ext2_rm:</tt> compiles and produces the <tt>ext2_rm</tt> executable</li>
+                                                <li><tt>ext2_rm_bonus (optional)</tt> compiles and produces the <tt>ext2_rm_bonus</tt> executable (optional, for bonus)</li>
+                                                <li><tt>ext2_restore:</tt> compiles and produces the <tt>ext2_restore</tt> executable</li>
+                                                <li><tt>ext2_restore_bonus (optional):</tt> compiles and produces the <tt>ext2_restore_bonus</tt> executable (optional, for bonus)</li>
+                                                <li><tt>ext2_checker:</tt> compiles and produces the <tt>ext2_checker</tt> executable</li>
+                                            </ul>
+                                            Additionally, invoking <tt>make</tt> without arguments must compile all the targets.
+                                            <br/> Please consider separating the bonus parts as indicated above, in order to make it easier for us to determine if you did the bonus or not. The bonus source files and their counterparts may include large
+                                            portions of the same code. This will make it easier for you as well, to make sure that at the very least the baseline implementation works, even if the bonus part may have problems or crash your baseline (non-bonus)
+                                            implementation.
+                                            <br/>
+                                        </p>
+
+                                        <p>
+                                            Additionally, you must submit an INFO.txt file, which contains as the first 3 lines the following:
+                                            <ul>
+                                                <li>your name(s)</li>
+                                                <li>your UtorID(s)</li>
+                                                <li>the <b>svn revision number</b> for your last submission. As a general rule, we will always take the last revision before the deadline (or after, if you decide to use grace tokens), so this is simply a sanity
+                                                    check for us that we did not miss a revision when we retrieve your code via MarkUs.</li>
+                                            </ul>
+                                            Aside from this, please feel free to describe problems you've encountered, what isn't fully implemented (or doesn't work fully), any special design decisions you've taken, etc. Feel free to explain what is not implemented and describe what features you
+                                            have completed. You may receive partial credit for functionality that is implemented but that does not complete one of the five required programs successfully.
+                                        </p>
+
+                                        <p> Finally, whether you work individually or in pairs with a partner, you <b>must</b> submit a <code>plagiarism.txt</code> file, with the following statement:<br/> "All members of this group reviewed all the code being
+                                            submitted and have a good understanding of it. All members of this group declare that no code other than their own has been submitted. We both acknowledge that not understanding our own work will result in a
+                                            zero on this assignment, and that if the code is detected to be plagiarised, severe academic penalties will be applied when the case is brought forward to the Dean of Arts and Science."
+                                        </p>
+
+                                        <p>
+                                            Very important notes (see also marking scheme and submission instructions above):<br/> - Assignments <b>missing a Makefile</b> will receive a 0, as if the code did not compile!<br/> - You must make sure that
+                                            your <b>Makefile compiles all of your files, including possible helper files</b>, depending on your design, and that you have included all the necessary targets specified above.<br/> - You must make sure that
+                                            the <b>source files that are mandatory are named exactly as indicated</b> in the handout, and that the Makefile produces <b>executables with the same name excluding the <tt>.c</tt> extension</b> (for example:
+                                            compiling <tt>ext2_cp.c</tt> should generate an executable named
+                                            <tt>ext2_cp</tt> - do not submit the executables though).<br/> - <b>Missing files due to submission mistakes</b> (forgot to add files, forgot to commit last version, etc.), will not be considered!<br/> - It
+                                            is your responsibility to ensure that <b>your code works exactly as you expect it to, on the teaching labs!</b>
+                                        </p>
+
+
+            </div>
+        </div>
+
+
+        <hr>
+        <footer>
+            <p>
+                &copy; 2017 Bogdan Simion
+                <span class="pull-right text-muted">
+            powered by
+            <a href="http://jekyll-bootstrap-3.github.io/preview/#/theme/Bootstrap" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll-Bootstrap-3</a>
+            and <a href="http://getbootstrap.com" target="_blank">Twitter Bootstrap 3.0.3</a>
+          </span>
+            </p>
+        </footer>
+    </div>
+
+
+
+    <script src="http://www.teach.cs.toronto.edu/~csc369h/fall/assets/themes/bootstrap/resources/jquery/jquery.min.js"></script>
+    <script src="http://www.teach.cs.toronto.edu/~csc369h/fall/assets/themes/bootstrap/resources/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>
